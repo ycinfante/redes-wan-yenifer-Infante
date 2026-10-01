@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WAN Architect AI · Corte 2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#142033}
+header{background:#fff;border-bottom:1px solid #d9e2ec;padding:18px 26px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:25px}header small{color:#66758a}.badge{border:1px solid #aac8ff;color:#2457c5;padding:9px 14px;border-radius:22px}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 80px)}nav{background:#fff;border-right:1px solid #d9e2ec;padding:18px}
+nav button{width:100%;border:0;background:transparent;text-align:left;padding:13px;border-radius:9px;font-size:15px;margin:3px 0;cursor:pointer}nav button.on{background:#eaf2ff;color:#2457c5;font-weight:700}
+main{padding:22px;max-width:1400px;width:100%}.page{display:none}.page.on{display:block}.card{background:#fff;border:1px solid #d9e2ec;border-radius:15px;padding:20px;margin-bottom:16px}
+h2{margin:0 0 8px}.muted{color:#66758a}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{background:#fff;border:1px solid #d9e2ec;border-radius:12px;padding:15px}.kpi b{font-size:24px;display:block}
+.btn{border:0;background:#2457c5;color:#fff;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}.btn2{background:#fff;color:#2457c5;border:1px solid #aac8ff}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{border:1px solid #c8d3df;background:#fff;border-radius:22px;padding:9px 14px;font-weight:700;cursor:pointer}.tabs button.on{background:#174f82;color:#fff}
+.path{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:15px 0}.node{background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:9px 13px;font-weight:800;text-align:center}.node small{display:block;color:#66758a;font-weight:400}.arrow{font-size:21px;color:#66758a}
+.topogrid{display:grid;grid-template-columns:minmax(440px,1.15fr) minmax(330px,.85fr);gap:22px}.zone{background:#e9eff6;border:1px solid #cbd5e1;border-radius:18px;padding:20px}
+.roof{width:90%;height:58px;margin:auto;background:#334155;clip-path:polygon(50% 0,100% 100%,0 100%);color:#fff;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-weight:900}
+.building{border:6px solid #334155;background:#cbd5e1;padding:8px}.floor{width:100%;min-height:60px;background:#fff;border:1px solid #94a3b8;border-left:8px solid #64748b;border-radius:6px;margin:5px 0;padding:8px 12px;display:grid;grid-template-columns:75px 1fr 105px;gap:10px;align-items:center;text-align:left;cursor:pointer}
+.floor.on{background:#eff6ff;border-color:#2563eb;border-left-color:#2563eb}.fnum{font-weight:900;color:#174f82}.fname{font-weight:800}.fmeta{display:block;font-size:12px;color:#66758a}.fusers{text-align:right;font-weight:800}.door{width:90px;height:40px;background:#334155;color:#fff;margin:8px auto -8px;border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.detail{background:#fff;border:1px solid #cbd5e1;border-radius:15px;padding:18px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:9px}.box span{display:block;font-size:10px;color:#66758a;text-transform:uppercase;font-weight:800}
+table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:13px}th{background:#f8fafc}
+.form{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}label{font-size:12px;font-weight:700}input,select{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:8px;margin-top:4px}
+pre{background:#101827;color:#e6edf7;padding:16px;border-radius:12px;white-space:pre-wrap;overflow:auto;min-height:220px}.ok{background:#eaf8ef;border:1px solid #9bd2ae;padding:12px;border-radius:10px;color:#176b35}
+.warn{background:#fff7e8;border:1px solid #f0c978;padding:12px;border-radius:10px;color:#7a5510}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:flex;overflow:auto;border-right:0}nav button{min-width:150px}.topogrid,.form,.kpis{grid-template-columns:1fr}}
+
+/* ===== V7 · Mapa WAN interactivo ===== */
+.wan-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 16px}
+.wan-map{position:relative;min-height:600px;border:1px solid #cbd5e1;border-radius:20px;background:linear-gradient(180deg,#f8fbff 0%,#eef5fb 100%);overflow:hidden;padding:28px}
+.wan-title{text-align:center}.wan-title h3{margin:0}.wan-title p{margin:5px 0;color:#66758a}
+.wan-cloud{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:240px;height:145px;background:#dcecff;border:3px solid #4c82b8;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3;box-shadow:0 8px 24px rgba(30,64,175,.10)}
+.wan-cloud:before,.wan-cloud:after{content:"";position:absolute;background:#dcecff;border:3px solid #4c82b8;border-radius:50%;z-index:-1}
+.wan-cloud:before{width:105px;height:105px;left:16px;top:-42px}.wan-cloud:after{width:125px;height:125px;right:12px;top:-50px}
+.wan-cloud b{font-size:24px;color:#174f82}.wan-cloud small{color:#52677d}
+.wan-site-card{position:absolute;width:260px;background:#fff;border:2px solid #9fb4c9;border-radius:16px;padding:14px;cursor:pointer;z-index:4;box-shadow:0 7px 20px rgba(15,23,42,.08);transition:.18s;text-align:left}
+.wan-site-card:hover{transform:translateY(-3px);border-color:#2563eb;box-shadow:0 10px 28px rgba(37,99,235,.15)}
+.wan-site-card h3{margin:0 0 5px}.wan-site-card p{margin:3px 0;color:#66758a;font-size:13px}.wan-site-card .enter{margin-top:9px;color:#2457c5;font-weight:800;font-size:13px}
+.wan-s1{left:5%;top:17%}.wan-s2{right:5%;top:17%}.wan-s3{left:50%;bottom:5%;transform:translateX(-50%)}.wan-s3:hover{transform:translateX(-50%) translateY(-3px)}
+.site-icon{font-size:34px;float:left;margin-right:10px}.router-mini{display:inline-block;margin-top:7px;padding:5px 8px;border-radius:7px;background:#eef4fa;color:#174f82;font-size:12px;font-weight:800}
+.wan-line{position:absolute;height:4px;background:#7897b5;transform-origin:left center;z-index:1;border-radius:4px}.wan-line:after{content:"";position:absolute;right:-2px;top:-4px;width:11px;height:11px;border-radius:50%;background:#2457c5}
+.line1{left:25%;top:33%;width:28%;transform:rotate(18deg)}.line2{left:51%;top:49%;width:29%;transform:rotate(-29deg)}.line3{left:49%;top:55%;width:24%;transform:rotate(90deg)}
+.wan-legend{position:absolute;left:24px;bottom:20px;background:rgba(255,255,255,.92);border:1px solid #d7e0ea;border-radius:10px;padding:9px 12px;color:#52677d;font-size:12px}
+.back-wan{border:1px solid #aac8ff;background:#fff;color:#2457c5;border-radius:9px;padding:9px 13px;font-weight:800;cursor:pointer}
+.site-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0}.site-summary>div{border:1px solid #dbe3ec;background:#f8fafc;border-radius:10px;padding:10px}.site-summary small{display:block;color:#66758a}.site-summary b{font-size:18px}
+@media(max-width:900px){.wan-map{min-height:auto;display:grid;gap:12px;padding:18px}.wan-cloud,.wan-site-card,.wan-line,.wan-legend{position:static;transform:none!important;width:auto}.wan-cloud{height:120px;border-radius:50px}.wan-cloud:before,.wan-cloud:after{display:none}.wan-line{display:none}.site-summary{grid-template-columns:1fr 1fr}}
+
+
+/* ===== V8 · Vista interna más limpia y profesional ===== */
+.site-summary{display:flex!important;gap:22px!important;flex-wrap:wrap!important;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px 18px;margin:14px 0 20px!important}
+.site-summary>div{border:0!important;background:transparent!important;padding:0 18px 0 0!important;border-right:1px solid #d8e1eb!important}
+.site-summary>div:last-child{border-right:0!important}
+.site-summary small{font-size:11px;text-transform:uppercase;letter-spacing:.04em}.site-summary b{font-size:20px!important}
+.topogrid{gap:28px!important;align-items:start}
+.zone{background:linear-gradient(180deg,#f4f7fa,#e8eef4)!important;border:0!important;border-radius:22px!important;padding:24px!important;box-shadow:inset 0 0 0 1px #d7e0e9}
+.roof{background:#2f465d!important;width:88%!important;height:52px!important;font-size:14px!important;letter-spacing:.05em}
+.building{background:#b9c6d3!important;border:5px solid #2f465d!important;border-top-width:4px!important;padding:6px 10px 10px!important;box-shadow:0 12px 25px rgba(15,23,42,.08)}
+.floor{border:0!important;border-bottom:1px solid #dbe3eb!important;border-left:5px solid transparent!important;border-radius:2px!important;margin:2px 0!important;min-height:55px!important;box-shadow:none!important;background:#fff!important;padding:8px 12px!important}
+.floor:hover{background:#f3f7fb!important;border-left-color:#7aa2c8!important}
+.floor.on{background:#e8f2fb!important;border-left-color:#1f6aa5!important}
+.fnum{font-size:12px!important;letter-spacing:.03em}.fname{font-size:14px}.fmeta{font-size:11px!important}.fusers{font-size:13px!important;color:#52677d!important}
+.door{background:#2f465d!important}
+.detail{border:0!important;border-radius:20px!important;padding:22px!important;box-shadow:0 8px 24px rgba(15,23,42,.08)!important}
+.detail-head{padding-bottom:15px;border-bottom:1px solid #e2e8f0;margin-bottom:15px}
+.detail-kicker{font-size:11px;color:#1f6aa5;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.detail-title{margin:4px 0 2px;font-size:22px}.detail-meta{color:#66758a;font-size:13px}
+.detail-section{margin-top:17px}.detail-section h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#52677d}
+.detail-line{display:flex;justify-content:space-between;gap:18px;padding:7px 0;border-bottom:1px solid #eef2f6;font-size:13px}.detail-line:last-child{border-bottom:0}.detail-line span{color:#66758a}.detail-line b{text-align:right;overflow-wrap:anywhere}
+.equipment-pills{display:flex;gap:9px;flex-wrap:wrap}.equipment-pill{background:#eef4f8;border-radius:999px;padding:8px 12px;font-size:13px}.equipment-pill b{color:#174f82}
+.wan-cloud b{font-size:18px!important;text-align:center;max-width:170px}.wan-cloud small{text-align:center;margin-top:4px}
+@media(max-width:700px){.site-summary>div{border-right:0!important}.detail-line{display:block}.detail-line b{display:block;text-align:left;margin-top:2px}}
+
+
+/* ===== V9 · Nodo WAN Core limpio ===== */
+.wan-cloud{
+  position:absolute!important;left:50%!important;top:47%!important;
+  transform:translate(-50%,-50%)!important;width:190px!important;height:190px!important;
+  background:#ffffff!important;border:3px solid #315f8c!important;border-radius:50%!important;
+  box-shadow:0 12px 30px rgba(30,64,100,.14)!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  z-index:3!important;padding:18px!important;
+}
+.wan-cloud:before,.wan-cloud:after{display:none!important}
+.wan-core-icon{width:72px;height:72px;border-radius:50%;background:#e8f1fa;border:2px solid #7fa3c5;position:relative;margin-bottom:8px}
+.wan-core-icon .hub{position:absolute;width:18px;height:18px;border-radius:50%;background:#245b8f;left:25px;top:25px}
+.wan-core-icon i{position:absolute;width:11px;height:11px;border-radius:50%;background:#5f86aa}
+.wan-core-icon i:nth-child(2){left:8px;top:9px}.wan-core-icon i:nth-child(3){right:8px;top:9px}.wan-core-icon i:nth-child(4){left:8px;bottom:9px}.wan-core-icon i:nth-child(5){right:8px;bottom:9px}
+.wan-core-icon:before,.wan-core-icon:after{content:"";position:absolute;left:17px;top:17px;width:38px;height:38px;border:1px solid #7fa3c5;transform:rotate(45deg)}
+.wan-cloud b{font-size:21px!important;color:#173f65!important;line-height:1.05!important;max-width:none!important}
+.wan-cloud small{font-size:12px!important;color:#687b8e!important;margin-top:5px!important}
+.wan-line{height:3px!important;background:#7897b5!important}
+.wan-line:after{width:9px!important;height:9px!important;top:-3px!important;background:#315f8c!important}
+.line1{left:27%!important;top:36%!important;width:23%!important;transform:rotate(18deg)!important}
+.line2{left:50%!important;top:47%!important;width:26%!important;transform:rotate(-29deg)!important}
+.line3{left:50%!important;top:56%!important;width:19%!important;transform:rotate(90deg)!important}
+@media(max-width:900px){
+ .wan-cloud{position:static!important;transform:none!important;width:auto!important;height:150px!important;border-radius:18px!important}
+ .wan-line{display:none!important}
+}
+
+</style></head>
+<body><header><div><h1>WAN Architect AI</h1><small>Herramienta de diseño y gestión de redes WAN</small></div><span class="badge">Corte 2</span></header>
+<div class="layout"><nav>
+<button class="on" data-p="inicio">▦ Inicio</button><button data-p="subnet">⌘ Subnetting</button><button data-p="topo">◇ Topología</button><button data-p="config">⚙ Configuraciones</button><button data-p="security">♢ Ciberdefensa</button><button data-p="evid">▣ Evidencias</button>
+</nav><main>
+<section id="inicio" class="page on"><div class="card"><h2>Proyecto cargado correctamente</h2><p class="muted">La herramienta utiliza el VLSM previamente diseñado como caso de prueba. Solo se cargaron las 23 filas reales del diseño.</p><div class="kpis"><div class="kpi"><span>Sedes</span><b>3</b></div><div class="kpi"><span>Pisos</span><b>23</b></div><div class="kpi"><span>Usuarios</span><b>3000</b></div><div class="kpi"><span>Subredes</span><b>23</b></div></div></div>
+<div class="card"><h2>Flujo del Corte 2</h2><p><b>1.</b> Verificar subnetting → <b>2.</b> cargar/generar topología → <b>3.</b> generar Cisco/Huawei → <b>4.</b> validar ciberdefensa → <b>5.</b> tomar evidencias.</p><button class="btn" onclick="go('subnet')">Comenzar por Subnetting</button></div></section>
+
+<section id="subnet" class="page"><div class="card"><h2>1 · Subnetting / IP Planning</h2><p class="muted">Selecciona una sede. La herramienta muestra el direccionamiento VLSM ya calculado y permite verificar cada segmento.</p><div id="subTabs" class="tabs"></div><div id="subTable"></div></div>
+<div class="card"><h3>Calculadora de verificación</h3><div class="form"><label>IPv4<input id="ip" value="172.22.0.0"></label><label>Prefijo CIDR<input id="cidr" type="number" min="1" max="30" value="24"></label><label>&nbsp;<button class="btn" style="margin-top:4px;width:100%" onclick="calc()">Calcular</button></label></div><div id="calcOut" style="margin-top:12px"></div></div></section>
+
+<section id="topo" class="page">
+<div class="card">
+  <h2>2 · Topología WAN interactiva</h2>
+  <p class="muted">La herramienta reutiliza automáticamente las 3 sedes y los 23 segmentos del plan VLSM. Selecciona una sede en el mapa WAN para entrar a su infraestructura.</p>
+  <div id="topoView"></div>
+</div>
+</section>
+
+<section id="config" class="page"><div class="card"><h2>3 · Configuraciones Cisco / Huawei</h2><p class="muted">Selecciona sede y piso. La configuración se genera usando la VLAN, gateway y máscara del direccionamiento.</p><div class="form"><label>Sede<select id="cfgSite"></select></label><label>Piso<select id="cfgFloor"></select></label><label>Fabricante<select id="vendor"><option>Cisco</option><option>Huawei</option></select></label></div><button class="btn" style="margin-top:12px" onclick="genConfig()">Generar configuración</button><pre id="cfgOut">Selecciona los datos y pulsa Generar configuración.</pre></div></section>
+
+<section id="security" class="page"><div class="card"><h2>4 · Ciberdefensa aplicada</h2><div class="ok">✓ No se almacenan contraseñas ni tokens en esta herramienta.</div><p>Controles implementados: validación de IPv4/CIDR, datos de ejemplo privados, configuraciones sin secretos reales y advertencia de revisión antes de ejecutar comandos.</p><div class="warn">⚠ Las configuraciones generadas deben revisarse y probarse únicamente en infraestructura autorizada del laboratorio.</div></div></section>
+
+<section id="evid" class="page"><div class="card"><h2>5 · Evidencias del Corte 2</h2><table><tr><th>Archivo</th><th>Qué debe mostrar</th><th>Estado</th></tr><tr><td>01-subnetting.png</td><td>IP, prefijo, red, broadcast y hosts</td><td>Pendiente captura</td></tr><tr><td>02-topologia.png</td><td>Edificio, dispositivos y enlaces</td><td>Pendiente captura</td></tr><tr><td>03-config-cisco.png</td><td>Hostname, VLAN e IP Cisco</td><td>Pendiente captura</td></tr><tr><td>04-config-huawei.png</td><td>Hostname, VLAN e IP Huawei</td><td>Pendiente captura</td></tr><tr><td>05-github-commits.png</td><td>Mínimo 5 commits claros</td><td>Pendiente GitHub</td></tr></table></div></section>
+</main></div>
+<script>
+const D=[{"site": "Sede 1", "floor": "Piso 1", "area": "Recepción y registro", "users": 180, "prefix": 24, "mask": "255.255.255.0", "network": "172.22.0.0", "gateway": "172.22.0.1", "first": "172.22.0.2", "last": "172.22.0.254", "broadcast": "172.22.0.255", "hosts": 254, "free": 73, "main": "172.22.0.0/21", "wired": 36, "wifi": 144, "aps": 6, "ports": 42, "switches": 2, "reserve": 54}, {"site": "Sede 1", "floor": "Piso 2", "area": "Atención al cliente", "users": 140, "prefix": 24, "mask": "255.255.255.0", "network": "172.22.2.0", "gateway": "172.22.2.1", "first": "172.22.2.2", "last": "172.22.2.254", "broadcast": "172.22.2.255", "hosts": 254, "free": 113, "main": "172.22.0.0/21", "wired": 84, "wifi": 56, "aps": 3, "ports": 87, "switches": 3, "reserve": 57}, {"site": "Sede 1", "floor": "Piso 3", "area": "Capacitación", "users": 110, "prefix": 25, "mask": "255.255.255.128", "network": "172.22.3.128", "gateway": "172.22.3.129", "first": "172.22.3.130", "last": "172.22.3.254", "broadcast": "172.22.3.255", "hosts": 126, "free": 15, "main": "172.22.0.0/21", "wired": 33, "wifi": 77, "aps": 4, "ports": 37, "switches": 1, "reserve": 11}, {"site": "Sede 1", "floor": "Piso 4", "area": "Auditorio y eventos", "users": 180, "prefix": 24, "mask": "255.255.255.0", "network": "172.22.1.0", "gateway": "172.22.1.1", "first": "172.22.1.2", "last": "172.22.1.254", "broadcast": "172.22.1.255", "hosts": 254, "free": 73, "main": "172.22.0.0/21", "wired": 18, "wifi": 162, "aps": 7, "ports": 25, "switches": 1, "reserve": 23}, {"site": "Sede 1", "floor": "Piso 5", "area": "Showroom y demostraciones", "users": 120, "prefix": 25, "mask": "255.255.255.128", "network": "172.22.3.0", "gateway": "172.22.3.1", "first": "172.22.3.2", "last": "172.22.3.126", "broadcast": "172.22.3.127", "hosts": 126, "free": 5, "main": "172.22.0.0/21", "wired": 30, "wifi": 90, "aps": 4, "ports": 34, "switches": 1, "reserve": 14}, {"site": "Sede 1", "floor": "Piso 6", "area": "Comercial y administración", "users": 90, "prefix": 25, "mask": "255.255.255.128", "network": "172.22.4.0", "gateway": "172.22.4.1", "first": "172.22.4.2", "last": "172.22.4.126", "broadcast": "172.22.4.127", "hosts": 126, "free": 35, "main": "172.22.0.0/21", "wired": 72, "wifi": 18, "aps": 1, "ports": 73, "switches": 2, "reserve": 23}, {"site": "Sede 1", "floor": "Piso 7", "area": "Soporte técnico", "users": 70, "prefix": 25, "mask": "255.255.255.128", "network": "172.22.4.128", "gateway": "172.22.4.129", "first": "172.22.4.130", "last": "172.22.4.254", "broadcast": "172.22.4.255", "hosts": 126, "free": 55, "main": "172.22.0.0/21", "wired": 56, "wifi": 14, "aps": 1, "ports": 57, "switches": 2, "reserve": 39}, {"site": "Sede 1", "floor": "Piso 8", "area": "Proyectos y reuniones", "users": 60, "prefix": 26, "mask": "255.255.255.192", "network": "172.22.5.0", "gateway": "172.22.5.1", "first": "172.22.5.2", "last": "172.22.5.62", "broadcast": "172.22.5.63", "hosts": 62, "free": 1, "main": "172.22.0.0/21", "wired": 42, "wifi": 18, "aps": 1, "ports": 43, "switches": 2, "reserve": 53}, {"site": "Sede 1", "floor": "Piso 9", "area": "TI e infraestructura", "users": 30, "prefix": 26, "mask": "255.255.255.192", "network": "172.22.5.64", "gateway": "172.22.5.65", "first": "172.22.5.66", "last": "172.22.5.126", "broadcast": "172.22.5.127", "hosts": 62, "free": 31, "main": "172.22.0.0/21", "wired": 27, "wifi": 3, "aps": 1, "ports": 28, "switches": 1, "reserve": 20}, {"site": "Sede 1", "floor": "Piso 10", "area": "Dirección y gerencia", "users": 20, "prefix": 27, "mask": "255.255.255.224", "network": "172.22.5.128", "gateway": "172.22.5.129", "first": "172.22.5.130", "last": "172.22.5.158", "broadcast": "172.22.5.159", "hosts": 30, "free": 9, "main": "172.22.0.0/21", "wired": 16, "wifi": 4, "aps": 1, "ports": 17, "switches": 1, "reserve": 31}, {"site": "Sede 2", "floor": "Piso 1", "area": "Recepción, seguridad y servicios generales", "users": 60, "prefix": 26, "mask": "255.255.255.192", "network": "172.22.12.128", "gateway": "172.22.12.129", "first": "172.22.12.130", "last": "172.22.12.190", "broadcast": "172.22.12.191", "hosts": 62, "free": 1, "main": "172.22.8.0/21", "wired": 18, "wifi": 42, "aps": 2, "ports": 20, "switches": 1, "reserve": 28}, {"site": "Sede 2", "floor": "Piso 2", "area": "Mesa de servicio y soporte al usuario", "users": 400, "prefix": 23, "mask": "255.255.254.0", "network": "172.22.8.0", "gateway": "172.22.8.1", "first": "172.22.8.2", "last": "172.22.9.254", "broadcast": "172.22.9.255", "hosts": 510, "free": 109, "main": "172.22.8.0/21", "wired": 340, "wifi": 60, "aps": 3, "ports": 343, "switches": 9, "reserve": 89}, {"site": "Sede 2", "floor": "Piso 3", "area": "Centro de monitoreo y operaciones (NOC)", "users": 250, "prefix": 24, "mask": "255.255.255.0", "network": "172.22.10.0", "gateway": "172.22.10.1", "first": "172.22.10.2", "last": "172.22.10.254", "broadcast": "172.22.10.255", "hosts": 254, "free": 3, "main": "172.22.8.0/21", "wired": 225, "wifi": 25, "aps": 1, "ports": 226, "switches": 6, "reserve": 62}, {"site": "Sede 2", "floor": "Piso 4", "area": "Ingeniería y proyectos", "users": 170, "prefix": 24, "mask": "255.255.255.0", "network": "172.22.11.0", "gateway": "172.22.11.1", "first": "172.22.11.2", "last": "172.22.11.254", "broadcast": "172.22.11.255", "hosts": 254, "free": 83, "main": "172.22.8.0/21", "wired": 145, "wifi": 25, "aps": 1, "ports": 146, "switches": 4, "reserve": 46}, {"site": "Sede 2", "floor": "Piso 5", "area": "Administración y recursos humanos", "users": 90, "prefix": 25, "mask": "255.255.255.128", "network": "172.22.12.0", "gateway": "172.22.12.1", "first": "172.22.12.2", "last": "172.22.12.126", "broadcast": "172.22.12.127", "hosts": 126, "free": 35, "main": "172.22.8.0/21", "wired": 72, "wifi": 18, "aps": 1, "ports": 73, "switches": 2, "reserve": 23}, {"site": "Sede 2", "floor": "Piso 6", "area": "Dirección operativa y gerencia", "users": 30, "prefix": 26, "mask": "255.255.255.192", "network": "172.22.12.192", "gateway": "172.22.12.193", "first": "172.22.12.194", "last": "172.22.12.254", "broadcast": "172.22.12.255", "hosts": 62, "free": 31, "main": "172.22.8.0/21", "wired": 24, "wifi": 6, "aps": 1, "ports": 25, "switches": 1, "reserve": 23}, {"site": "Sede 3", "floor": "Piso 1", "area": "Recepción y espacios colaborativos", "users": 80, "prefix": 25, "mask": "255.255.255.128", "network": "172.22.20.128", "gateway": "172.22.20.129", "first": "172.22.20.130", "last": "172.22.20.254", "broadcast": "172.22.20.255", "hosts": 126, "free": 45, "main": "172.22.16.0/21", "wired": 24, "wifi": 56, "aps": 3, "ports": 27, "switches": 1, "reserve": 21}, {"site": "Sede 3", "floor": "Piso 2", "area": "Formación y laboratorios", "users": 220, "prefix": 24, "mask": "255.255.255.0", "network": "172.22.18.0", "gateway": "172.22.18.1", "first": "172.22.18.2", "last": "172.22.18.254", "broadcast": "172.22.18.255", "hosts": 254, "free": 33, "main": "172.22.16.0/21", "wired": 132, "wifi": 88, "aps": 4, "ports": 136, "switches": 4, "reserve": 56}, {"site": "Sede 3", "floor": "Piso 3", "area": "Desarrollo tecnológico e innovación", "users": 350, "prefix": 23, "mask": "255.255.254.0", "network": "172.22.16.0", "gateway": "172.22.16.1", "first": "172.22.16.2", "last": "172.22.17.254", "broadcast": "172.22.17.255", "hosts": 510, "free": 159, "main": "172.22.16.0/21", "wired": 263, "wifi": 87, "aps": 4, "ports": 267, "switches": 7, "reserve": 69}, {"site": "Sede 3", "floor": "Piso 4", "area": "Ingeniería e investigación", "users": 150, "prefix": 24, "mask": "255.255.255.0", "network": "172.22.19.0", "gateway": "172.22.19.1", "first": "172.22.19.2", "last": "172.22.19.254", "broadcast": "172.22.19.255", "hosts": 254, "free": 103, "main": "172.22.16.0/21", "wired": 120, "wifi": 30, "aps": 2, "ports": 122, "switches": 4, "reserve": 70}, {"site": "Sede 3", "floor": "Piso 5", "area": "Pruebas y laboratorio técnico", "users": 110, "prefix": 25, "mask": "255.255.255.128", "network": "172.22.20.0", "gateway": "172.22.20.1", "first": "172.22.20.2", "last": "172.22.20.126", "broadcast": "172.22.20.127", "hosts": 126, "free": 15, "main": "172.22.16.0/21", "wired": 83, "wifi": 27, "aps": 2, "ports": 85, "switches": 3, "reserve": 59}, {"site": "Sede 3", "floor": "Piso 6", "area": "Administración y gestión de proyectos", "users": 60, "prefix": 26, "mask": "255.255.255.192", "network": "172.22.21.0", "gateway": "172.22.21.1", "first": "172.22.21.2", "last": "172.22.21.62", "broadcast": "172.22.21.63", "hosts": 62, "free": 1, "main": "172.22.16.0/21", "wired": 48, "wifi": 12, "aps": 1, "ports": 49, "switches": 2, "reserve": 47}, {"site": "Sede 3", "floor": "Piso 7", "area": "Dirección y arquitectura tecnológica", "users": 30, "prefix": 26, "mask": "255.255.255.192", "network": "172.22.21.64", "gateway": "172.22.21.65", "first": "172.22.21.66", "last": "172.22.21.126", "broadcast": "172.22.21.127", "hosts": 62, "free": 31, "main": "172.22.16.0/21", "wired": 24, "wifi": 6, "aps": 1, "ports": 25, "switches": 1, "reserve": 23}]; let site=1,floor=1;
+const num=v=>{let m=String(v).match(/\d+/);return m?+m[0]:0};
+function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.p===id));if(id==='topo'){topoMode='wan';renderTopo();}}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+function tabs(id,fn){document.getElementById(id).innerHTML=[1,2,3].map(s=>`<button class="${s===site?'on':''}" onclick="${fn}(${s})">🏢 Sede ${s}</button>`).join('')}
+function subSite(s){site=s;renderSub()}
+function renderSub(){tabs('subTabs','subSite');let r=D.filter(x=>num(x.site)===site).sort((a,b)=>num(a.floor)-num(b.floor));document.getElementById('subTable').innerHTML=`<table><tr><th>Piso / Área</th><th>Usuarios</th><th>Red</th><th>Máscara</th><th>Gateway</th><th>Broadcast</th><th>Hosts útiles</th></tr>${r.map(x=>`<tr><td><b>${x.floor}</b><br>${x.area}</td><td>${x.users}</td><td>${x.network}/${x.prefix}</td><td>${x.mask}</td><td>${x.gateway}</td><td>${x.broadcast}</td><td>${x.hosts}</td></tr>`).join('')}</table>`}
+let topoMode='wan';
+function topoSite(s){site=s;floor=1;topoMode='site';renderTopo()}
+function showWan(){topoMode='wan';renderTopo()}
+function renderTopo(){
+ const view=document.getElementById('topoView'); if(!view)return;
+ if(topoMode==='wan'){
+   const summaries=[1,2,3].map(s=>{
+     const rs=D.filter(x=>num(x.site)===s);
+     return {s, floors:rs.length, users:rs.reduce((a,x)=>a+Number(x.users||0),0), subnets:rs.length};
+   });
+   const card=(z,cls,vendor)=>`<button class="wan-site-card ${cls}" onclick="topoSite(${z.s})">
+      <span class="site-icon">🏢</span><h3>Sede ${z.s}</h3>
+      <p>${z.floors} pisos · ${z.users} usuarios</p>
+      <p>${z.subnets} segmentos VLSM</p>
+      <span class="router-mini">◉ Router ${vendor}</span>
+      <div class="enter">Ver infraestructura →</div>
+   </button>`;
+   view.innerHTML=`<div class="wan-map">
+      <div class="wan-title"><h3>Topología WAN Corporativa</h3><p>Arquitectura de conectividad entre sedes</p></div>
+      <div class="wan-line line1"></div><div class="wan-line line2"></div><div class="wan-line line3"></div>
+      <div class="wan-cloud"><div class="wan-core-icon"><span class="hub"></span><i></i><i></i><i></i><i></i></div><b>WAN CORE</b><small>Backbone corporativo</small></div>
+      ${card(summaries[0],'wan-s1','Cisco')}
+      ${card(summaries[1],'wan-s2','Huawei')}
+      ${card(summaries[2],'wan-s3','Cisco')}
+      <div class="wan-legend">Selecciona una sede para consultar su infraestructura, distribución por pisos y direccionamiento.</div>
+   </div>`;
+   return;
+ }
+ let r=D.filter(x=>num(x.site)===site).sort((a,b)=>num(b.floor)-num(a.floor));
+ if(!r.some(x=>num(x.floor)===floor))floor=num(r[r.length-1].floor);
+ let total=r.reduce((a,x)=>a+Number(x.users||0),0),x=r.find(x=>num(x.floor)===floor);
+ let totalSw=r.reduce((a,x)=>a+Number(x.switches||0),0),totalAp=r.reduce((a,x)=>a+Number(x.aps||0),0);
+ let floors=r.map(y=>{let f=num(y.floor);return `<button class="floor ${f===floor?'on':''}" onclick="floor=${f};renderTopo()"><span class="fnum">PISO ${f}</span><span><span class="fname">${y.area}</span><span class="fmeta">VLAN ${100+f} · ${y.network}/${y.prefix}</span></span><span class="fusers">${y.users} usuarios</span></button>`}).join('');
+ view.innerHTML=`<div class="wan-actions"><button class="back-wan" onclick="showWan()">← Volver al mapa WAN</button><b>Sede ${site} · Vista interna</b></div>
+ <div class="path"><div class="node">☁ RED WAN CORPORATIVA<small>Backbone</small></div><div class="arrow">→</div><div class="node">Router de borde S${site}<small>${site===2?'Huawei':'Cisco'}</small></div><div class="arrow">→</div><div class="node">Switch Core<small>CORE-S${site}</small></div><div class="arrow">→</div><div class="node">🏢 Edificio<small>Sede ${site}</small></div></div>
+ <div class="site-summary"><div><small>Pisos</small><b>${r.length}</b></div><div><small>Usuarios</small><b>${total}</b></div><div><small>Switches acceso</small><b>${totalSw}</b></div><div><small>Access Points</small><b>${totalAp}</b></div></div>
+ <div class="topogrid"><div class="zone"><div class="roof">EDIFICIO · SEDE ${site}</div><div class="building">${floors}<div class="door">ENTRADA</div></div></div>
+ <div class="detail">
+   <div class="detail-head"><div class="detail-kicker">Sede ${site} · Piso ${floor}</div><h3 class="detail-title">${x.area}</h3><div class="detail-meta">${x.users} usuarios · VLAN ${100+floor}</div></div>
+   <div class="detail-section"><h4>Direccionamiento</h4>
+     <div class="detail-line"><span>Subred</span><b>${x.network}/${x.prefix}</b></div>
+     <div class="detail-line"><span>Gateway</span><b>${x.gateway}</b></div>
+     <div class="detail-line"><span>Máscara</span><b>${x.mask}</b></div>
+     <div class="detail-line"><span>Broadcast</span><b>${x.broadcast}</b></div>
+     <div class="detail-line"><span>Rango utilizable</span><b>${x.first} – ${x.last}</b></div>
+   </div>
+   <div class="detail-section"><h4>Capacidad</h4>
+     <div class="detail-line"><span>Usuarios proyectados</span><b>${x.users}</b></div>
+     <div class="detail-line"><span>Hosts disponibles</span><b>${x.hosts}</b></div>
+   </div>
+   <div class="detail-section"><h4>Equipamiento de acceso</h4>
+     <div class="equipment-pills"><span class="equipment-pill"><b>${x.switches}</b> switches</span><span class="equipment-pill"><b>${x.aps}</b> access points</span></div>
+   </div>
+ </div></div>`;
+}
+function ip2n(ip){let a=ip.split('.').map(Number);if(a.length!==4||a.some(x=>x<0||x>255||!Number.isInteger(x)))throw 0;return (((a[0]*256+a[1])*256+a[2])*256+a[3])>>>0}
+function n2ip(n){return [n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.')}
+function calc(){try{let ip=document.getElementById('ip').value.trim(),p=+document.getElementById('cidr').value;if(p<1||p>30)throw 0;let n=ip2n(ip),size=2**(32-p),net=Math.floor(n/size)*size,bc=net+size-1,mask=(0xffffffff<<(32-p))>>>0;document.getElementById('calcOut').innerHTML=`<div class="ok"><b>Red:</b> ${n2ip(net)}/${p} &nbsp; <b>Máscara:</b> ${n2ip(mask)} &nbsp; <b>Hosts:</b> ${n2ip(net+1)} – ${n2ip(bc-1)} &nbsp; <b>Broadcast:</b> ${n2ip(bc)} &nbsp; <b>Utilizables:</b> ${size-2}</div>`}catch(e){document.getElementById('calcOut').innerHTML='<div class="warn">Dirección o prefijo no válido.</div>'}}
+function fillCfg(){let ss=document.getElementById('cfgSite'),ff=document.getElementById('cfgFloor');ss.innerHTML=[1,2,3].map(s=>`<option value="${s}">Sede ${s}</option>`).join('');ss.onchange=()=>{site=+ss.value;fillFloors()};fillFloors()}
+function fillFloors(){let ff=document.getElementById('cfgFloor');let r=D.filter(x=>num(x.site)===site);ff.innerHTML=r.map(x=>`<option value="${num(x.floor)}">${x.floor} · ${x.area}</option>`).join('')}
+function genConfig(){site=+document.getElementById('cfgSite').value;let f=+document.getElementById('cfgFloor').value,x=D.find(y=>num(y.site)===site&&num(y.floor)===f),v=100+f,vendor=document.getElementById('vendor').value;if(vendor==='Cisco')document.getElementById('cfgOut').textContent=`hostname SW-S${site}-P${f}\n!\nvlan ${v}\n name PISO_${f}\n!\ninterface Vlan${v}\n ip address ${x.gateway} ${x.mask}\n no shutdown\n!\ninterface GigabitEthernet1/0/1\n switchport mode access\n switchport access vlan ${v}\n spanning-tree portfast\n!\nend`;else document.getElementById('cfgOut').textContent=`system-view\nsysname SW-S${site}-P${f}\nvlan batch ${v}\ninterface Vlanif${v}\n ip address ${x.gateway} ${x.mask}\n quit\ninterface GigabitEthernet0/0/1\n port link-type access\n port default vlan ${v}\n quit\nsave`}
+renderSub();renderTopo();fillCfg();calc();
+</script></body></html>
